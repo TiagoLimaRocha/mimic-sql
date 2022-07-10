@@ -45,15 +45,11 @@ class Query {
     if (!xs.length) return;
 
     if (this.isSet(this.groupByFilters) && Array.isArray(xs[0])) {
-      const res = xs
-        .map(([i, j]) => {
-          if (j.length) return [i, this.filterBy(j, λ)];
-        })
-        .filter((x) => x !== undefined && x[1].length);
-
-      res.sort((a, b) => (a as any)[1].length - (b as any)[1].length);
-
-      return res;
+      return xs
+      .map(([i, j]) => {
+        if (j.length) return [i, this.filterBy(j, λ)];
+      })
+      .filter((x) => x !== undefined && x[1].length);;
     }
 
     return xs.filter((x: any) => λ(x));
