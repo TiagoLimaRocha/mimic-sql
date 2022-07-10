@@ -51,9 +51,7 @@ class Query {
         })
         .filter((x) => x !== undefined && x[1].length);
 
-      if (this.isSet(this.groupByFilters)) {
-        res.sort((a, b) => (a as any)[1].length - (b as any)[1].length);
-      }
+      res.sort((a, b) => (a as any)[1].length - (b as any)[1].length);
 
       return res;
     }
