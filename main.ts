@@ -13,6 +13,7 @@ class Query {
   private groupByFilters?: Lambda[];
   private whereFilters?: Lambda[][];
   private havingFilters?: Lambda[][];
+  private limitFilters?: number;
 
   private counters: Counters;
 
@@ -25,6 +26,7 @@ class Query {
     this.groupByFilters = undefined;
     this.orderByFilter = undefined;
     this.havingFilters = undefined;
+    this.limitFilters = undefined;
 
     this.counters = {
       selectCount: 0,
@@ -46,10 +48,10 @@ class Query {
 
     if (this.isSet(this.groupByFilters) && Array.isArray(xs[0])) {
       return xs
-      .map(([i, j]) => {
-        if (j.length) return [i, this.filterBy(j, λ)];
-      })
-      .filter((x) => x !== undefined && x[1].length);;
+        .map(([i, j]) => {
+          if (j.length) return [i, this.filterBy(j, λ)];
+        })
+        .filter((x) => x !== undefined && x[1].length);
     }
 
     return xs.filter((x: any) => λ(x));
@@ -109,6 +111,9 @@ class Query {
     }
   };
 
+  private handleLimit = (xs: Collection, limitFilters?: number) =>
+    this.isSet(limitFilters) ? xs.slice(0, limitFilters) : xs;
+
   private handleSelect = (xs: Collection, selected: Lambda) => {
     return this.isSet(selected) ? this.mapByField(xs, selected) : xs;
   };
@@ -161,7 +166,7 @@ class Query {
    ****************************************************************/
 
   public select(fields?: Lambda) {
-    this.handleException("selectCount", "Duplicate SELECT");
+    this.handleException('selectCount', 'Duplicate SELECT');
 
     this.selected = fields;
 
@@ -169,13 +174,23 @@ class Query {
   }
 
   public from(xs: Collection, ys?: Collection) {
-    this.handleException("fromCount", "Duplicate FROM");
+    this.handleException('fromCount', 'Duplicate FROM');
 
     if (!this.isSet(ys)) {
     }
     this.collection = !this.isSet(ys)
       ? xs
       : xs.map((n: any) => (ys as Collection).map((m: any) => [n, m])).flat();
+
+    return this;
+  }
+
+  public limit(limitFilters: number) {
+    if (!this.isSet(limitFilters)) {
+      this.limitFilters = NaN;
+    }
+
+    this.limitFilters = limitFilters;
 
     return this;
   }
@@ -191,7 +206,7 @@ class Query {
   }
 
   public groupBy(...groupByFilters: Lambda[]) {
-    this.handleException("groupByCount", "Duplicate GROUPBY");
+    this.handleException('groupByCount', 'Duplicate GROUPBY');
 
     this.groupByFilters = [...groupByFilters];
 
@@ -209,7 +224,7 @@ class Query {
   }
 
   public orderBy(orderByFilter: Lambda) {
-    this.handleException("orderByCount", "Duplicate ORDERBY");
+    this.handleException('orderByCount', 'Duplicate ORDERBY');
 
     this.orderByFilter = orderByFilter;
 
@@ -221,7 +236,7 @@ class Query {
    ****************************************************************/
 
   public execute() {
-    this.handleException("executeCount", "Duplicate EXECUTE");
+    this.handleException('executeCount', 'Duplicate EXECUTE');
 
     const where = this.handleWhere(this.collection, this.whereFilters);
 
@@ -233,10 +248,20 @@ class Query {
 
     const result = this.handleSelect(having, this.selected as Lambda);
 
-    return result;
+    const limit = this.handleLimit(result, this.limitFilters);
+
+    return limit;
   }
 }
 
+/**
+ * This method mimics the SQL syntax with TypeScript.
+ * Useful for getting items from a list of objects, filtering, grouping, sorting, etc.
+ *
+ * @see https://github.com/TiagoLimaRocha/mimic-sql
+ *
+ * @returns a new Query instance
+ */
 export function query() {
   return new Query();
 }
