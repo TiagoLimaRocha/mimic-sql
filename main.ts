@@ -166,7 +166,7 @@ class Query {
    ****************************************************************/
 
   public select(fields?: Lambda) {
-    this.handleException('selectCount', 'Duplicate SELECT');
+    this.handleException("selectCount", "Duplicate SELECT");
 
     this.selected = fields;
 
@@ -174,7 +174,7 @@ class Query {
   }
 
   public from(xs: Collection, ys?: Collection) {
-    this.handleException('fromCount', 'Duplicate FROM');
+    this.handleException("fromCount", "Duplicate FROM");
 
     if (!this.isSet(ys)) {
     }
@@ -206,7 +206,7 @@ class Query {
   }
 
   public groupBy(...groupByFilters: Lambda[]) {
-    this.handleException('groupByCount', 'Duplicate GROUPBY');
+    this.handleException("groupByCount", "Duplicate GROUPBY");
 
     this.groupByFilters = [...groupByFilters];
 
@@ -224,7 +224,7 @@ class Query {
   }
 
   public orderBy(orderByFilter: Lambda) {
-    this.handleException('orderByCount', 'Duplicate ORDERBY');
+    this.handleException("orderByCount", "Duplicate ORDERBY");
 
     this.orderByFilter = orderByFilter;
 
@@ -236,7 +236,7 @@ class Query {
    ****************************************************************/
 
   public execute() {
-    this.handleException('executeCount', 'Duplicate EXECUTE');
+    this.handleException("executeCount", "Duplicate EXECUTE");
 
     const where = this.handleWhere(this.collection, this.whereFilters);
 
